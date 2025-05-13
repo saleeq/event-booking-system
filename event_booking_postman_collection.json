@@ -1,0 +1,1104 @@
+{
+	"info": {
+		"_postman_id": "68a9e3b2-d5c6-4aa3-bff7-f5b34ea9c54d",
+		"name": "Event Booking System API",
+		"description": "A comprehensive collection for testing the Event Booking System API built with Django REST Framework. This collection covers authentication, events, attendees, bookings, and countries endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"description": "JWT token authentication endpoints",
+			"item": [
+				{
+					"name": "Obtain JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"if (jsonData.access) {",
+									"    pm.environment.set(\"access_token\", jsonData.access);",
+									"    pm.environment.set(\"refresh_token\", jsonData.refresh);",
+									"    pm.test(\"Token saved to environment\", function() {",
+									"        pm.expect(pm.environment.get(\"access_token\")).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"token",
+								""
+							]
+						},
+						"description": "Get JWT access and refresh tokens using admin credentials"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"if (jsonData.access) {",
+									"    pm.environment.set(\"access_token\", jsonData.access);",
+									"    pm.test(\"Access token refreshed\", function() {",
+									"        pm.expect(pm.environment.get(\"access_token\")).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/refresh/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"token",
+								"refresh",
+								""
+							]
+						},
+						"description": "Refresh an expired access token using the refresh token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Events",
+			"description": "Event management endpoints",
+			"item": [
+				{
+					"name": "List All Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/events/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "conference",
+									"description": "Search by title or description",
+									"disabled": true
+								},
+								{
+									"key": "location",
+									"value": "1",
+									"description": "Filter by location ID",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"description": "Filter by active status",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number for pagination",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get a list of all events with optional search and filtering parameters"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Django Conference 2024\",\n    \"description\": \"Annual Django developers conference\",\n    \"start_datetime\": \"2024-06-15T09:00:00Z\",\n    \"end_datetime\": \"2024-06-17T18:00:00Z\",\n    \"location\": 1,\n    \"capacity\": 500,\n    \"price\": \"299.99\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/events/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								""
+							]
+						},
+						"description": "Create a new event (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/events/{{event_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								"{{event_id}}",
+								""
+							]
+						},
+						"description": "Get details of a specific event by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Django Conference 2024 - Updated\",\n    \"description\": \"Annual Django developers conference with new workshops\",\n    \"start_datetime\": \"2024-06-15T09:00:00Z\",\n    \"end_datetime\": \"2024-06-17T18:00:00Z\",\n    \"location\": 1,\n    \"capacity\": 550,\n    \"price\": \"349.99\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/events/{{event_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								"{{event_id}}",
+								""
+							]
+						},
+						"description": "Update an existing event (creator only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": \"329.99\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/events/{{event_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								"{{event_id}}",
+								""
+							]
+						},
+						"description": "Partially update an existing event (creator only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/events/{{event_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								"{{event_id}}",
+								""
+							]
+						},
+						"description": "Delete an event (creator only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event Bookings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/events/{{event_id}}/bookings/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								"{{event_id}}",
+								"bookings",
+								""
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "confirmed",
+									"description": "Filter by booking status",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all bookings for a specific event"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Available Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/events/available/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"events",
+								"available",
+								""
+							]
+						},
+						"description": "Get all available events (not fully booked and active)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Attendees",
+			"description": "Attendee management endpoints",
+			"item": [
+				{
+					"name": "List All Attendees",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendees/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendees",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "doe",
+									"description": "Search by name or email",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number for pagination",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get a list of all attendees with optional search parameters"
+					},
+					"response": []
+				},
+				{
+					"name": "Register Attendee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"if (jsonData.id) {",
+									"    pm.environment.set(\"attendee_id\", jsonData.id);",
+									"    pm.test(\"Attendee ID saved to environment\", function() {",
+									"        pm.expect(pm.environment.get(\"attendee_id\")).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1234567890\",\n    \"date_of_birth\": \"1990-01-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendees/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendees",
+								""
+							]
+						},
+						"description": "Register a new attendee (no authentication required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendee",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendees/{{attendee_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendees",
+								"{{attendee_id}}",
+								""
+							]
+						},
+						"description": "Get details of a specific attendee by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Attendee",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.updated@example.com\",\n    \"phone\": \"+1987654321\",\n    \"date_of_birth\": \"1990-01-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendees/{{attendee_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendees",
+								"{{attendee_id}}",
+								""
+							]
+						},
+						"description": "Update an existing attendee's information"
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Attendee",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john.newemail@example.com\",\n    \"phone\": \"+1999888777\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendees/{{attendee_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendees",
+								"{{attendee_id}}",
+								""
+							]
+						},
+						"description": "Partially update an attendee's information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Attendee",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendees/{{attendee_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendees",
+								"{{attendee_id}}",
+								""
+							]
+						},
+						"description": "Delete an attendee"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendee Bookings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendees/{{attendee_id}}/bookings/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendees",
+								"{{attendee_id}}",
+								"bookings",
+								""
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "confirmed",
+									"description": "Filter by booking status",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all bookings for a specific attendee"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bookings",
+			"description": "Booking management endpoints",
+			"item": [
+				{
+					"name": "List All Bookings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								""
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "confirmed",
+									"description": "Filter by status",
+									"disabled": true
+								},
+								{
+									"key": "event",
+									"value": "1",
+									"description": "Filter by event ID",
+									"disabled": true
+								},
+								{
+									"key": "attendee",
+									"value": "1",
+									"description": "Filter by attendee ID",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number for pagination",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get a list of all bookings with optional filtering (auth required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"if (jsonData.id) {",
+									"    pm.environment.set(\"booking_id\", jsonData.id);",
+									"    pm.test(\"Booking ID saved to environment\", function() {",
+									"        pm.expect(pm.environment.get(\"booking_id\")).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"event\": {{event_id}},\n    \"attendee\": {{attendee_id}},\n    \"status\": \"pending\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								""
+							]
+						},
+						"description": "Create a new booking (auth required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{booking_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"{{booking_id}}",
+								""
+							]
+						},
+						"description": "Get details of a specific booking by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"event\": {{event_id}},\n    \"attendee\": {{attendee_id}},\n    \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{booking_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"{{booking_id}}",
+								""
+							]
+						},
+						"description": "Update an existing booking"
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{booking_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"{{booking_id}}",
+								""
+							]
+						},
+						"description": "Partially update a booking"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{booking_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"{{booking_id}}",
+								""
+							]
+						},
+						"description": "Delete a booking"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{booking_id}}/confirm/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"{{booking_id}}",
+								"confirm",
+								""
+							]
+						},
+						"description": "Confirm a pending booking"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{booking_id}}/cancel/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"{{booking_id}}",
+								"cancel",
+								""
+							]
+						},
+						"description": "Cancel a booking"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Countries",
+			"description": "Country management endpoints",
+			"item": [
+				{
+					"name": "List All Countries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/countries/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"countries",
+								""
+							]
+						},
+						"description": "Get a list of all available countries"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Country",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/countries/{{country_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								"countries",
+								"{{country_id}}",
+								""
+							]
+						},
+						"description": "Get details of a specific country by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "API Documentation",
+			"description": "Documentation endpoints",
+			"item": [
+				{
+					"name": "Swagger UI Documentation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/swagger/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"swagger",
+								""
+							]
+						},
+						"description": "Interactive API documentation using Swagger UI"
+					},
+					"response": []
+				},
+				{
+					"name": "ReDoc Documentation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/redoc/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"redoc",
+								""
+							]
+						},
+						"description": "Alternative API documentation using ReDoc"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "event_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "attendee_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "booking_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "country_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
